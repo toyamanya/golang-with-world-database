@@ -24,8 +24,11 @@ func main() {
 	}
 
 	fmt.Println("Connected!")
-	city := City{}
-	db.Get(&city, "SELECT * FROM city WHERE Name='Tokyo'")
+	cities := []City{}
+	db.Select(&cities, "SELECT * FROM city WHERE CountryCode='JPN'")
 
-	fmt.Printf("Tokyoの人口は%d人です\n", city.Population)
+	fmt.Println("日本の都市一覧")
+	for _, city := range cities {
+		fmt.Printf("都市名: %s, 人口: %d人\n", city.Name, city.Population)
+	}
 }
