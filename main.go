@@ -14,7 +14,13 @@ type City struct {
 	Name        string `json:"name,omitermpty" db:"Name"`
 	CountryCode string `json:"countryCode,omitempty" db:"CountryCode"`
 	District    string `json:"district,omitempty" db:"District"`
-	Population  int    `json:"population,omitempty" db:"Population"`
+	Population  int32  `json:"population,omitempty" db:"Population"`
+}
+
+type Country struct {
+	Code       string `json:"id,omitempty" db:"Code"`
+	Name       string `json:"name;omitempty" db:"Name"`
+	Population int32  `json:"population,omitempty" db:"Population"`
 }
 
 func main() {
@@ -24,11 +30,17 @@ func main() {
 	}
 
 	fmt.Println("Connected!")
-	cities := []City{}
-	db.Select(&cities, "SELECT * FROM city WHERE CountryCode='JPN'")
 
-	fmt.Println("日本の都市一覧")
-	for _, city := range cities {
-		fmt.Printf("都市名: %s, 人口: %d人\n", city.Name, city.Population)
-	}
+	searchCityName := os.Args[1]
+
+	city := City{}
+	country := Country{}
+
+	// 名前のcityの情報を持ってくる
+	db.Get(&city, "SELECT * FROM city WHERE Name='"+searchCityName+"'")
+	db.Get(&country, "SELECT Code, country.Name, country.Population FROM country INNER JOIN city ON Code = CountryCode WHERE city.Name = '"+searchCityName+"'")
+
+	rate := float64(city.Population) * float64(100) / float64(country.Population)
+
+	fmt.Printf("%sの人口は%sの内%.2f%%です\n", searchCityName, country.Name, rate)
 }
